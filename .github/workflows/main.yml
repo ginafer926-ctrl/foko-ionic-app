@@ -30,6 +30,15 @@ jobs:
 
       - name: Preparar proyecto nativo Android con Capacitor
         run: |
+          mkdir -p www
+          FOUND_INDEX=$(find . -maxdepth 4 -name "index.html" ! -path "./src/*" ! -path "./node_modules/*" ! -path "./android/*" | head -n 1)
+          if [ -n "$FOUND_INDEX" ]; then
+            BUILD_DIR=$(dirname "$FOUND_INDEX")
+            if [ "$BUILD_DIR" != "./www" ] && [ "$BUILD_DIR" != "www" ]; then
+              cp -r "$BUILD_DIR"/* www/
+            fi
+          fi
+          ls -la www
           npx cap add android
           npx cap sync android
 
