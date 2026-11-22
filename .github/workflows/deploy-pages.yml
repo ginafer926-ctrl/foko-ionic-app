@@ -1,0 +1,47 @@
+name: Publicar FoKo en GitHub Pages
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Instalar dependencias y compilar para GitHub Pages
+        run: |
+          npm install --legacy-peer-deps
+          npx ng build --base-href /foko-ionic-app/
+
+      - name: Preparar artefacto web
+        run: |
+          FOUND_INDEX=$(find . -maxdepth 4 -name "index.html" ! -path "./src/*" ! -path "./node_modules/*" ! -path "./android/*" | head -n 1)
+          BUILD_DIR=$(dirname "$FOUND_INDEX")
+          echo "DEPLOY_DIR=$BUILD_DIR" >> $GITHUB_ENV
+
+      - name: Subir artefacto a GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.DEPLOY_DIR }}
+
+      - name: Desplegar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
