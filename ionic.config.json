@@ -1,0 +1,7 @@
+{
+  "name": "FoKo",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
